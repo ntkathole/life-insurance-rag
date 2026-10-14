@@ -24,6 +24,7 @@ metadata:
   annotations:
     notebooks.opendatahub.io/inject-oauth: "true"
     notebooks.opendatahub.io/oauth-logout-url: ""
+    notebooks.opendatahub.io/last-image-selection: "s2i-generic-data-science-notebook:3.6"
     opendatahub.io/image-display-name: "Standard Data Science"
     opendatahub.io/accelerator-name: ""
     openshift.io/display-name: "Life Insurance RAG Workbench"
@@ -33,7 +34,7 @@ spec:
     spec:
       containers:
         - name: life-insurance-rag-workbench
-          image: image-registry.openshift-image-registry.svc:5000/redhat-ods-applications/s2i-generic-data-science-notebook:2025.2
+          image: image-registry.openshift-image-registry.svc:5000/redhat-ods-applications/s2i-generic-data-science-notebook:3.6
           ports:
             - containerPort: 8888
               name: notebook-port
@@ -57,7 +58,6 @@ spec:
                 secretKeyRef:
                   name: postgres-secret
                   key: POSTGRES_PASSWORD
-            # Feast feature server URL (auto-created by the operator)
             - name: FEAST_SERVER_URL
               value: http://feast-life-insurance-rag-online.life-insurance-rag.svc.cluster.local:80
           envFrom:
