@@ -64,7 +64,12 @@ ENTRYPOINT
 
 RUN chmod +x /app/entrypoint.sh
 
-# OpenShift runs as random UID
+# OpenShift runs as random UID — set writable cache dirs for HuggingFace/sentence-transformers
+ENV HF_HOME=/tmp/hf_home \
+    TRANSFORMERS_CACHE=/tmp/hf_home/transformers \
+    SENTENCE_TRANSFORMERS_HOME=/tmp/hf_home/sentence_transformers \
+    XDG_CACHE_HOME=/tmp/.cache
+
 RUN chmod -R g+rwX /app
 
 EXPOSE 7860
