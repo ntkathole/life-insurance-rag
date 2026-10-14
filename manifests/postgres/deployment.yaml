@@ -1,3 +1,22 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: postgres-init
+  namespace: life-insurance-rag
+  labels:
+    app: postgres
+data:
+  init-vector.sql: |
+    CREATE EXTENSION IF NOT EXISTS vector;
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: postgres-sa
+  namespace: life-insurance-rag
+  labels:
+    app: postgres
+---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -15,17 +34,38 @@ spec:
       labels:
         app: postgres
     spec:
+      serviceAccountName: postgres-sa
+      securityContext:
+        runAsUser: 999
+        fsGroup: 999
       containers:
         - name: postgres
-          image: quay.io/feastdev-ci/feast-test-images:postgres-17-alpine
+          image: pgvector/pgvector:0.8.0-pg17
           ports:
             - containerPort: 5432
-          envFrom:
-            - secretRef:
-                name: postgres-secret
+          env:
+            - name: POSTGRES_USER
+              valueFrom:
+                secretKeyRef:
+                  name: postgres-secret
+                  key: POSTGRES_USER
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: postgres-secret
+                  key: POSTGRES_PASSWORD
+            - name: POSTGRES_DB
+              valueFrom:
+                secretKeyRef:
+                  name: postgres-secret
+                  key: POSTGRES_DB
+            - name: PGDATA
+              value: /var/lib/postgresql/data/pgdata
           volumeMounts:
-            - mountPath: /var/lib/postgresql
+            - mountPath: /var/lib/postgresql/data
               name: postgresdata
+            - mountPath: /docker-entrypoint-initdb.d
+              name: init-scripts
           resources:
             requests:
               memory: "512Mi"
@@ -45,6 +85,9 @@ spec:
         - name: postgresdata
           persistentVolumeClaim:
             claimName: postgres-data
+        - name: init-scripts
+          configMap:
+            name: postgres-init
 ---
 apiVersion: v1
 kind: Service
