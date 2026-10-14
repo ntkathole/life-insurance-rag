@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: life-insurance-rag
+  labels:
+    app.kubernetes.io/part-of: life-insurance-rag
+    opendatahub.io/dashboard: "true"
+  annotations:
+    openshift.io/description: "Life Insurance RAG demo with Feast feature store on OpenShift AI"
+    openshift.io/display-name: "Life Insurance RAG Demo"

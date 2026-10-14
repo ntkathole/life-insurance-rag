@@ -1,0 +1,27 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: life-insurance-rag
+
+resources:
+  # Namespace
+  - base/namespace.yaml
+
+  # PostgreSQL + pgvector
+  - postgres/secret.yaml
+  - postgres/pvc.yaml
+  - postgres/deployment.yaml
+
+  # Feast data-stores secret (connection strings for the operator)
+  - base/feast-data-stores-secret.yaml
+
+  # FeatureStore CR (the operator handles the rest)
+  - base/featurestore.yaml
+
+  # RHOAI Workbench (Jupyter notebooks)
+  - workbench/notebook.yaml
+
+labels:
+  - pairs:
+      app.kubernetes.io/part-of: life-insurance-rag
+    includeSelectors: false

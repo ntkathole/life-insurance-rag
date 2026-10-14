@@ -1,0 +1,78 @@
+# FeatureStore CR - deployed and managed by the Feast Operator on OpenShift AI.
+#
+# This CR tells the operator to:
+#   1. Deploy a Feast registry server (SQL-backed by PostgreSQL)
+#   2. Deploy a Feast online feature server with PostgreSQL + pgvector
+#   3. Enable MCP (Model Context Protocol) on both registry and online servers
+#   4. Pull the feature repo from git (github.com/ntkathole/life-insurance-rag)
+#   5. Run `feast apply` via an init container to populate the registry
+#
+apiVersion: feast.dev/v1
+kind: FeatureStore
+metadata:
+  name: life-insurance-rag
+  namespace: life-insurance-rag
+spec:
+  feastProject: life_insurance_rag
+
+  # Pull feature definitions from the git repo
+  feastProjectDir:
+    git:
+      url: https://github.com/ntkathole/life-insurance-rag
+      ref: main
+      featureRepoPath: feature_repo
+
+  services:
+    # --- Online Store (feature serving + vector search) ---
+    onlineStore:
+      persistence:
+        store:
+          type: postgres
+          secretRef:
+            name: feast-data-stores
+      server:
+        envFrom:
+          - secretRef:
+              name: postgres-secret
+        resources:
+          requests:
+            cpu: 250m
+            memory: 512Mi
+          limits:
+            cpu: "1"
+            memory: 2Gi
+      # Enable MCP on the online feature server
+      serving:
+        mcp:
+          enabled: true
+          serverName: life-insurance-rag
+          serverVersion: "1.0.0"
+          transport: sse
+
+    # --- Registry (SQL-backed, with REST API + MCP) ---
+    registry:
+      local:
+        persistence:
+          store:
+            type: sql
+            secretRef:
+              name: feast-data-stores
+        server:
+          envFrom:
+            - secretRef:
+                name: postgres-secret
+          # Enable REST API (required for MCP)
+          restAPI: true
+          mcp:
+            enabled: true
+          resources:
+            requests:
+              cpu: 250m
+              memory: 256Mi
+            limits:
+              cpu: 500m
+              memory: 1Gi
+
+  # No auth for demo purposes
+  authz:
+    noAuth: true

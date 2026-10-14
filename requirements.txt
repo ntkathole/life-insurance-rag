@@ -1,0 +1,11 @@
+feast[postgres]>=0.41.0
+numpy>=1.24.0
+pandas>=2.0.0
+pyarrow>=12.0.0
+sentence-transformers>=2.2.0
+gradio>=4.0.0
+psycopg[binary]>=3.1.0
+psycopg-pool>=3.1.0
+openai>=1.0.0
+jupyter>=1.0.0
+ipywidgets>=8.0.0

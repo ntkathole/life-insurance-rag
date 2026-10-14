@@ -1,0 +1,80 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: workbench-data
+  namespace: life-insurance-rag
+  labels:
+    app: workbench
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 20Gi
+---
+apiVersion: kubeflow.org/v1
+kind: Notebook
+metadata:
+  name: life-insurance-rag-workbench
+  namespace: life-insurance-rag
+  labels:
+    app: life-insurance-rag
+    opendatahub.io/dashboard: "true"
+    opendatahub.io/odh-managed: "true"
+  annotations:
+    notebooks.opendatahub.io/inject-oauth: "true"
+    notebooks.opendatahub.io/oauth-logout-url: ""
+    opendatahub.io/image-display-name: "Standard Data Science"
+    opendatahub.io/accelerator-name: ""
+    openshift.io/display-name: "Life Insurance RAG Workbench"
+    openshift.io/description: "Workbench for the Life Insurance RAG + Feast demo"
+spec:
+  template:
+    spec:
+      containers:
+        - name: life-insurance-rag-workbench
+          image: image-registry.openshift-image-registry.svc:5000/redhat-ods-applications/s2i-generic-data-science-notebook:3.6
+          ports:
+            - containerPort: 8888
+              name: notebook-port
+              protocol: TCP
+          env:
+            - name: NOTEBOOK_ARGS
+              value: "--NotebookApp.token='' --NotebookApp.password=''"
+            - name: FEAST_PG_HOST
+              value: postgres.life-insurance-rag.svc.cluster.local
+            - name: FEAST_PG_PORT
+              value: "5432"
+            - name: FEAST_PG_DATABASE
+              value: feast
+            - name: FEAST_PG_USER
+              valueFrom:
+                secretKeyRef:
+                  name: postgres-secret
+                  key: POSTGRES_USER
+            - name: FEAST_PG_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: postgres-secret
+                  key: POSTGRES_PASSWORD
+            # Feast feature server URL (auto-created by the operator)
+            - name: FEAST_SERVER_URL
+              value: http://feast-life-insurance-rag-online.life-insurance-rag.svc.cluster.local:80
+          envFrom:
+            - secretRef:
+                name: postgres-secret
+          resources:
+            requests:
+              cpu: 500m
+              memory: 2Gi
+            limits:
+              cpu: "2"
+              memory: 8Gi
+          volumeMounts:
+            - mountPath: /opt/app-root/src
+              name: workbench-data
+          workingDir: /opt/app-root/src
+      volumes:
+        - name: workbench-data
+          persistentVolumeClaim:
+            claimName: workbench-data
