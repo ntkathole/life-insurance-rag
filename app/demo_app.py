@@ -97,7 +97,6 @@ def run_query(level: str, customer_id: str, query: str):
 
 with gr.Blocks(
     title="Life Insurance RAG - Feast Feature Store Demo",
-    theme=gr.themes.Soft(),
 ) as demo:
     gr.Markdown(
         "# Life Insurance RAG Maturity Demo\n"
@@ -157,4 +156,4 @@ with gr.Blocks(
     )
 
 if __name__ == "__main__":
-    demo.launch(server_name=APP_HOST, server_port=APP_PORT, share=False)
+    demo.launch(server_name=APP_HOST, server_port=APP_PORT, share=False, theme=gr.themes.Soft())
