@@ -5,6 +5,7 @@ metadata:
   labels:
     app.kubernetes.io/part-of: life-insurance-rag
     opendatahub.io/dashboard: "true"
+    opendatahub.io/feast: "true"
   annotations:
     openshift.io/description: "Life Insurance RAG demo with Feast feature store on OpenShift AI"
     openshift.io/display-name: "Life Insurance RAG Demo"

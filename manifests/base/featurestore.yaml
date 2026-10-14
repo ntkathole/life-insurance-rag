@@ -1,9 +1,9 @@
 # FeatureStore CR - deployed and managed by the Feast Operator on OpenShift AI.
 #
 # This CR tells the operator to:
-#   1. Deploy a Feast registry server (SQL-backed by PostgreSQL)
+#   1. Deploy a Feast registry server (SQL-backed by PostgreSQL) with REST API
 #   2. Deploy a Feast online feature server with PostgreSQL + pgvector
-#   3. Enable MCP (Model Context Protocol) on both registry and online servers
+#   3. Enable MCP (Model Context Protocol) on the online server
 #   4. Pull the feature repo from git (github.com/ntkathole/life-insurance-rag)
 #   5. Run `feast apply` via an init container to populate the registry
 #
@@ -12,6 +12,8 @@ kind: FeatureStore
 metadata:
   name: life-insurance-rag
   namespace: life-insurance-rag
+  labels:
+    feature-store-ui: enabled
 spec:
   feastProject: life_insurance_rag
 
@@ -61,10 +63,10 @@ spec:
           envFrom:
             - secretRef:
                 name: postgres-secret
-          # Enable REST API (required for MCP)
+          # Enable REST API (required for dashboard UI)
           restAPI: true
-          mcp:
-            enabled: true
+          # NOTE: MCP on registry disabled due to fastapi_mcp version conflict
+          # in RHOAI 3.6.0-ea.2. MCP is enabled on the online server instead.
           resources:
             requests:
               cpu: 250m
