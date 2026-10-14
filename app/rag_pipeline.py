@@ -149,13 +149,13 @@ def level1_batch_features(
         for t, c in zip(docs.get("title", []), docs.get("content", []))
     )
 
-    coverage = profile.get("coverage_amount", [0])[0]
+    coverage = profile.get("coverage_amount", [0])[0] or 0
     prompt = (
         "You are a helpful life insurance assistant.\n\n"
         f"CUSTOMER: {name}\n"
-        f"  Policy: {profile.get('policy_number', [''])[0]}\n"
-        f"  Plan: {plan_type}, coverage Rs {coverage:,.0f}\n"
-        f"  Premium: {profile.get('premium_frequency', [''])[0]}\n\n"
+        f"  Policy: {profile.get('policy_number', [''])[0] or 'N/A'}\n"
+        f"  Plan: {plan_type or 'N/A'}, coverage Rs {coverage:,.0f}\n"
+        f"  Premium: {profile.get('premium_frequency', [''])[0] or 'N/A'}\n\n"
         f"DOCUMENTS:\n{doc_context}\n\n"
         f"QUESTION: {query}\n\n"
         "Answer personally and accurately."
@@ -224,18 +224,18 @@ def level2_streaming(
         for t, c in zip(docs.get("title", []), docs.get("content", []))
     )
 
-    name = features.get("customer_name", ["Customer"])[0]
-    claim_num = features.get("claim_number", ["N/A"])[0]
-    days_left = features.get("estimated_days_remaining", [0])[0]
+    name = features.get("customer_name", ["Customer"])[0] or "Customer"
+    claim_num = features.get("claim_number", ["N/A"])[0] or "N/A"
+    days_left = features.get("estimated_days_remaining", [0])[0] or 0
 
     prompt = (
         "You are a helpful life insurance assistant with real-time data.\n\n"
         f"CUSTOMER: {name}\n"
-        f"  Plan: {plan_type}\n"
-        f"  Claim: #{claim_num} - Stage: {claim_stage}\n"
-        f"  Filed: {features.get('claim_filed_date', [''])[0]}\n"
+        f"  Plan: {plan_type or 'N/A'}\n"
+        f"  Claim: #{claim_num} - Stage: {claim_stage or 'N/A'}\n"
+        f"  Filed: {features.get('claim_filed_date', [''])[0] or 'N/A'}\n"
         f"  Est. days remaining: {days_left}\n"
-        f"  Docs pending: {features.get('documents_pending', [0])[0]}\n\n"
+        f"  Docs pending: {features.get('documents_pending', [0])[0] or 0}\n\n"
         f"DOCUMENTS:\n{doc_context}\n\n"
         f"QUESTION: {query}\n\n"
         "Answer with specific details about the customer's claim."
@@ -324,12 +324,12 @@ def level3_realtime(
         "You are a life insurance assistant with full context.\n\n"
         f"MEMORY: {memory_section}\n\n"
         f"CUSTOMER: {name}\n"
-        f"  Plan: {plan_type}, Coverage: Rs {context.get('coverage_amount', [0])[0]:,.0f}\n"
-        f"  Claim: #{context.get('claim_number', ['N/A'])[0]}"
-        f" - {context.get('claim_stage', ['no claim'])[0]}\n"
-        f"  Est. payout: Rs {context.get('estimated_payout', [0])[0]:,.0f}\n"
-        f"  Can withdraw: {context.get('can_withdraw_claim', ['N/A'])[0]}\n"
-        f"  Days since filed: {context.get('days_since_filed', [0])[0]}\n\n"
+        f"  Plan: {plan_type or 'N/A'}, Coverage: Rs {(context.get('coverage_amount', [0])[0] or 0):,.0f}\n"
+        f"  Claim: #{context.get('claim_number', ['N/A'])[0] or 'N/A'}"
+        f" - {context.get('claim_stage', ['no claim'])[0] or 'no claim'}\n"
+        f"  Est. payout: Rs {(context.get('estimated_payout', [0])[0] or 0):,.0f}\n"
+        f"  Can withdraw: {context.get('can_withdraw_claim', ['N/A'])[0] or 'N/A'}\n"
+        f"  Days since filed: {context.get('days_since_filed', [0])[0] or 0}\n\n"
         f"DOCUMENTS:\n{doc_context}\n\n"
         f"QUESTION: {query}\n\n"
         "If the customer is returning, acknowledge their previous interaction. "
