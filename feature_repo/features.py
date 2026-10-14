@@ -77,7 +77,7 @@ insurance_docs = FeatureView(
             name="embedding",
             dtype=Array(Float32),
             vector_index=True,
-            vector_search_metric="COSINE",
+            vector_search_metric="cosine",
         ),
         Field(name="content", dtype=String),
         Field(name="title", dtype=String),

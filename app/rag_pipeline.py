@@ -11,6 +11,7 @@ from typing import Any, Dict, List, Optional, Tuple
 
 import pandas as pd
 from feast import FeatureStore
+from feast.filter_models import ComparisonFilter
 
 from config import FEAST_REPO_PATH, EMBEDDING_DIM
 
@@ -71,7 +72,7 @@ def level0_basic_rag(query: str) -> Tuple[str, Dict[str, Any]]:
     store = get_store()
     embedding = embed_query(query)
 
-    results = store.retrieve_online_documents(
+    results = store.retrieve_online_documents_v2(
         features=[
             "insurance_docs:embedding",
             "insurance_docs:content",
@@ -80,7 +81,6 @@ def level0_basic_rag(query: str) -> Tuple[str, Dict[str, Any]]:
         ],
         query=embedding,
         top_k=3,
-        distance_metric="cosine",
     )
     docs = results.to_dict()
 
@@ -140,8 +140,7 @@ def level1_batch_features(
         ],
         query=embedding,
         top_k=3,
-        distance_metric="cosine",
-        filters={"plan_type": plan_type} if plan_type else None,
+        filters=ComparisonFilter(type="eq", key="plan_type", value=plan_type) if plan_type else None,
     )
     docs = results.to_dict()
 
@@ -217,7 +216,6 @@ def level2_streaming(
         query=embedding,
         query_string=keyword,
         top_k=3,
-        distance_metric="cosine",
     )
     docs = results.to_dict()
 
@@ -304,8 +302,7 @@ def level3_realtime(
         query=embedding,
         query_string=query,
         top_k=3,
-        distance_metric="cosine",
-        filters={"plan_type": plan_type} if plan_type else None,
+        filters=ComparisonFilter(type="eq", key="plan_type", value=plan_type) if plan_type else None,
     )
     docs = results.to_dict()
 

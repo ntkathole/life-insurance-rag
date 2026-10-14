@@ -44,6 +44,7 @@ online_store:
   password: ${PG_PASS}
   sslmode: disable
   vector_enabled: true
+  enable_openai_compatible_store: true
 
 offline_store:
   type: file
@@ -59,6 +60,17 @@ entity_key_serialization_version: 3
 EOF
 
 echo "Generated feature_store.yaml pointing to ${PG_HOST}:${PG_PORT}"
+
+# Apply schema updates (creates openai-compatible tables if needed)
+echo "Running feast apply to update schema..."
+cd /app/feature_repo && python -c "
+from feast import FeatureStore
+store = FeatureStore('.')
+store.apply([])
+print('feast apply completed')
+" 2>&1 || echo "Warning: feast apply failed, continuing anyway"
+cd /app
+
 exec python app/demo_app.py
 ENTRYPOINT
 
