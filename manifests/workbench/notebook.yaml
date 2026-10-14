@@ -33,7 +33,7 @@ spec:
     spec:
       containers:
         - name: life-insurance-rag-workbench
-          image: image-registry.openshift-image-registry.svc:5000/redhat-ods-applications/s2i-generic-data-science-notebook:3.6
+          image: image-registry.openshift-image-registry.svc:5000/redhat-ods-applications/s2i-generic-data-science-notebook:2025.2
           ports:
             - containerPort: 8888
               name: notebook-port
