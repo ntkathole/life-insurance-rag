@@ -70,13 +70,17 @@ from feast import FeatureStore
 from features import (
     insurance_docs, customer_profile, claim_status,
     interaction_memory, realtime_computed,
-    customer, document
+    customer, document,
+    level0_basic_rag_service, level1_personalised_rag_service,
+    level2_streaming_rag_service, level3_full_context_rag_service,
 )
 store = FeatureStore('.')
 store.apply([
     customer, document,
     insurance_docs, customer_profile, claim_status,
     interaction_memory, realtime_computed,
+    level0_basic_rag_service, level1_personalised_rag_service,
+    level2_streaming_rag_service, level3_full_context_rag_service,
 ])
 print('feast apply completed')
 " 2>&1 || echo "Warning: feast apply failed, continuing anyway"
