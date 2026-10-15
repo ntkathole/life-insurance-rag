@@ -61,6 +61,18 @@ EOF
 
 echo "Generated feature_store.yaml pointing to ${PG_HOST}:${PG_PORT}"
 
+# Clear stale managed_infra entries (e.g. leftover SQLite refs from the Feast operator)
+# Without this, feast apply fails with 'Permission denied: /feast-data' on OpenShift
+echo "Clearing stale managed_infra entries..."
+python -c "
+import psycopg
+conn = psycopg.connect(host='${PG_HOST}', port=${PG_PORT}, dbname='${PG_DB}', user='${PG_USER}', password='${PG_PASS}')
+conn.execute('DELETE FROM managed_infra WHERE infra_proto::text LIKE \'%sqlite%\' OR infra_proto::text LIKE \'%feast-data%\'')
+conn.commit()
+conn.close()
+print('Cleaned stale infra refs')
+" 2>&1 || echo "Warning: managed_infra cleanup skipped (table may not exist yet)"
+
 # Apply schema updates (creates openai-compatible tables if needed)
 echo "Running feast apply to update schema..."
 cd /app/feature_repo && python -c "
