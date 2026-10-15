@@ -64,9 +64,20 @@ echo "Generated feature_store.yaml pointing to ${PG_HOST}:${PG_PORT}"
 # Apply schema updates (creates openai-compatible tables if needed)
 echo "Running feast apply to update schema..."
 cd /app/feature_repo && python -c "
+import sys
+sys.path.insert(0, '.')
 from feast import FeatureStore
+from features import (
+    insurance_docs, customer_profile, claim_status,
+    interaction_memory, realtime_computed,
+    customer, document
+)
 store = FeatureStore('.')
-store.apply([])
+store.apply([
+    customer, document,
+    insurance_docs, customer_profile, claim_status,
+    interaction_memory, realtime_computed,
+])
 print('feast apply completed')
 " 2>&1 || echo "Warning: feast apply failed, continuing anyway"
 cd /app
